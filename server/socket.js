@@ -1,4 +1,4 @@
-var dic = decodeURI(require("fs").readFileSync("dics/large")).split("\n").slice(0, 1000);
+var dic = decodeURI(require("fs").readFileSync("dics/large")).split("\n");
 var splitNum = 100;
 var dicGroup = arrSlice(dic, splitNum);
 var dns = require("dns");
@@ -6,12 +6,13 @@ var db = require("./db");
 
 module.exports = function (socket) {
     socket.on("DOMAIN", function (data) {
-        var pos = 0;
-        var t = +new Date();
         var url1 = data.url.toString() || "";
         var url2 = {};
         parseURL(url1).forEach(function (rawUrl) {
+            var pos = 0;
+            var t = +new Date();
             url2[rawUrl] = [];
+
             socket.emit("DOMAIN_INFO", {domain: rawUrl, msg: "parse started"});
             db.urldb.find({domain: rawUrl}).select("-_id").exec(function (err, doc) {
                 if (!err) {
@@ -24,37 +25,36 @@ module.exports = function (socket) {
                     }
                 }
                 else  socket.emit("DOMAIN_ERROR", {domain: rawUrl, msg: "db rong"});
-            })
+            });
+            function dnsLook(arr, socket, rawUrl, i) {
+                arr[i].forEach(function (item, index) {
+                    dns.lookup([item, rawUrl].join("."), 4, function (err, doc) {
+                        pos++;
+                        if (!err && !/202\.106\.199/.test(doc)) {
+                            var data = {ip: doc, url: item, domain: rawUrl};
+                            socket.emit("DOMAIN_DATA", [data]);
+                            url2[rawUrl].push(data)
+                        }
+                        if (index + 1 == arr[i].length && i + 1 < arr.length) {
+                            dnsLook(arr, socket, rawUrl, i + 1);
+                        }
+                        if (+new Date() - t > 1000) {
+                            t = +new Date();
+                            socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: pos / dic.length})
+                        }
+                        if (pos == dic.length) {
+                            socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: 1});
+
+                            db.urldb.findOneAndUpdate({domain: rawUrl}, {
+                                subdomain: url2[rawUrl],
+                                updated_at: Date.now()
+                            }, {upsert: true}, function () {
+                            })
+                        }
+                    });
+                })
+            }
         });
-
-        function dnsLook(arr, socket, rawUrl, i) {
-            arr[i].forEach(function (item, index) {
-                dns.lookup([item, rawUrl].join("."), 4, function (err, doc) {
-                    pos++;
-                    if (!err) {
-                        var data = {ip: doc, url: item, domain: rawUrl};
-                        socket.emit("DOMAIN_DATA", [data]);
-                        url2[rawUrl].push(data)
-                    }
-                    if (index + 1 == arr[i].length && i + 1 < arr.length) {
-                        dnsLook(arr, socket, rawUrl, i + 1);
-                    }
-                    if (+new Date() - t > 1000) {
-                        t = +new Date();
-                        socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: pos / dic.length})
-                    }
-                    if (pos == dic.length) {
-                        socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: 1});
-
-                        db.urldb.findOneAndUpdate({domain: rawUrl}, {
-                            subdomain: url2[rawUrl],
-                            updated_at: Date.now()
-                        }, {upsert: true}, function () {
-                        })
-                    }
-                });
-            })
-        }
     })
 };
 
@@ -65,9 +65,11 @@ function arrSlice(arr, len) {
             return [v]
         });
     var d = Math.floor(l / len);
+    var le = l % len;
     var r = [];
     for (var i = 0; i < len; i++)
         r.push(arr.slice(i * d, (i + 1) * d))
+    r[r.length-1]= r[r.length-1].concat(arr.slice(-le));
     return r;
 }
 
