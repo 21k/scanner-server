@@ -2,7 +2,7 @@ var db = {}
     , mongoose = require('mongoose')
     , Schema = mongoose.Schema
     , ObjectId = Schema.ObjectId
-    , url = process.env.MONGOURL||"localhost/db_url";
+    , url = process.env.MONGOURL||"mongodb://localhost/db_url";
 
 var dataDb = mongoose.createConnection(url);
 var dataSchema = new Schema({
