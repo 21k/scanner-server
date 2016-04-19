@@ -5,13 +5,14 @@ var dns = require("dns");
 var db = require("./db");
 var task = {};
 
+
 module.exports = function (io) {
     io.on("connection", function (socket) {
         socket.on("DOMAIN", function (data) {
             var url1 = data.url.toString().replace(/^http(s)?:\/\/|\/\//g, "").toLowerCase() || "";
             parseURL(url1).forEach(function (rawUrl) {
                 socket.emit("DOMAIN_INFO", {domain: rawUrl, msg: "parse started"});
-                db.urldb.find({domain: rawUrl}).select("-_id").exec(function (err, doc) {
+                db.urldb.find({domain: rawUrl}).exec(function (err, doc) {
                     if (!err) {
                         if (!doc.length) {//没有查询过
                             if (!task[rawUrl]) {//记录任务和订阅者
@@ -46,6 +47,7 @@ module.exports = function (io) {
                             }
                         }
                         else {//已经查询过
+
                             socket.emit("DOMAIN_DATA", doc[0].subdomain);
                             socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: 1});
                         }

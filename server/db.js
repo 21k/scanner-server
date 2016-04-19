@@ -1,6 +1,5 @@
-var db = {}
-    , config = require("./config")
-    , mongoose = require('mongoose')
+var  config=require("./config")
+     ,mongoose = require('mongoose')
     , Schema = mongoose.Schema
     , ObjectId = Schema.ObjectId;
 
@@ -9,7 +8,7 @@ var dataSchema = new Schema({
     domain: String,
     ip: String,
     subdomain: Array,
-    updated_at: Date
+    updated_at: {type: Date, default: Date.now}
 },{collection:"url_db"});
 
 module.exports = {
