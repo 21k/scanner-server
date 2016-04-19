@@ -1,4 +1,5 @@
-var  app = require('express')()
+var config = require("./server/config")
+    , app = require('express')()
     , server = require('http').createServer(app)
     , io = require('socket.io')(server)
     , bodyParser = require('body-parser')
@@ -14,13 +15,15 @@ app.use(function (error, req, res, next) {
 });
 
 
-(function(app){
-    //app.get("/url/:url",web.parseUrl)
-}(app,web));
+(function (app) {
+}(app, web));
 
-(function(io){
-    io.on("connection",socket)
-}(io,socket));
 
-app.listen(3010,function(){console.log("web start at ported 3010")});
-server.listen(3011,function(){console.log("socket start at port 3011")});
+socket(io);
+
+app.listen(config.webport, function () {
+    console.log("web started at port ",config.webport)
+});
+server.listen(config.socketport, function () {
+    console.log("socket started at port ",config.socketport)
+});

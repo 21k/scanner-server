@@ -1,15 +1,15 @@
 var db = {}
+    , config = require("./config")
     , mongoose = require('mongoose')
     , Schema = mongoose.Schema
-    , ObjectId = Schema.ObjectId
-    , url = process.env.MONGOURL||"mongodb://localhost/db_url";
+    , ObjectId = Schema.ObjectId;
 
-var dataDb = mongoose.createConnection(url);
+var dataDb = mongoose.createConnection(config.mongourl);
 var dataSchema = new Schema({
     domain: String,
     ip: String,
     subdomain: Array,
-    updated_at: {type: Date, default: Date.now}
+    updated_at: Date
 },{collection:"url_db"});
 
 module.exports = {
