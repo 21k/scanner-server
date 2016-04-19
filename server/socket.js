@@ -1,4 +1,4 @@
-var dic = decodeURI(require("fs").readFileSync("dics/large")).split("\n").slice(0, 1000);
+var dic = decodeURI(require("fs").readFileSync("dics/large")).split("\n");
 var splitNum = parseInt(dic.length/4);
 var dicGroup = arrSlice(dic, splitNum);
 var dns = require("dns");
