@@ -6,6 +6,6 @@ module.exports = {
         url: "api.alauda.cn",
         port: "443",
         pro: "https",
-        token: process.env.DOCKERTOKEN || "xxÔÆµÄtoken£¬ÐÖµÜ"
+        token: process.env.DOCKERTOKEN || "xxäº‘çš„tokenï¼Œå…„å¼Ÿ"
     }
 }

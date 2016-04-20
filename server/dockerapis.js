@@ -5,52 +5,52 @@ module.exports = dockerapis;
 function dockerapis(options, callback) {
     var namespace = options.namespace || "csrf";
     var urls = {
-        //´´½¨docker
+        //åˆ›å»ºdocker
         create: {
             path: "/v1/services/" + namespace,
             method: "POST",
             data: JSON.stringify(options.data) || ""
-        },//¼àÊÓdocker
+        },//ç›‘è§†docker
         monitor: {
             path: "/v1/services/" + namespace + "/" + options.servicename,
             method: "GET",
             data: ""
-        },//ÔİÍ£docker
+        },//æš‚åœdocker
         stop: {
             path: "/v1/services/" + namespace + "/" + options.servicename + "/stop",
             method: "PUT",
             data: ""
-        },//É¾³ıdocker
+        },//åˆ é™¤docker
         remove: {
             path: "/v1/services/" + namespace + "/" + options.servicename,
             method: "DELETE",
             data: ""
-        },//´´½¨ÈÎÎñ
+        },//åˆ›å»ºä»»åŠ¡
         task: {
             path: "/v1/jobs",
             method: "POST",
             data: JSON.stringify(options.data) || ""
-        },//ÈÎÎñ¸üĞÂ
+        },//ä»»åŠ¡æ›´æ–°
         taskupdate: {
             path: "/v1/jobs/" + options.jobid,
             method: "PUT",
             data: JSON.stringify(options.data) || ""
-        },//ÈÎÎñ¼ÇÂ¼
+        },//ä»»åŠ¡è®°å½•
         taskruninfo: {
             path: "/v1/jobs/" + options.jobid + "/execs/",
             method: "GET",
             data: ""
-        },//ÓÃ»§µÄÈÎÎñ
+        },//ç”¨æˆ·çš„ä»»åŠ¡
         mytask: {
             path: "/v1/jobs?namespace=" + namespace + "&filter__name__startswith=" + options.taskname,
             method: "GET",
             data: ""
-        },//ÈÎÎñÄ³Ìõ¼ÇÂ¼ÈÕÖ¾
+        },//ä»»åŠ¡æŸæ¡è®°å½•æ—¥å¿—
         tasklog: {
             path: "/v1/jobs/" + options.jobid + "/execs/" + options.exeid + "/logs?start_time=" + parseInt(new Date(options.started_at) / 1000 - 60 * 10),
             method: "GET",
             data: ""
-        },//É¾³ıÈÎÎñ
+        },//åˆ é™¤ä»»åŠ¡
         deltask: {
             path: "/v1/jobs/" + options.jobjd,
             method: "DELETE",

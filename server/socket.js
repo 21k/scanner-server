@@ -10,39 +10,39 @@ var task = {};
 
 module.exports = function (io) {
     io.on("connection", function (socket) {
-        //²éÑ¯ÓòÃû
+        //æŸ¥è¯¢åŸŸå
         socket.on("DOMAIN", function (data) {
             var url1 = data.url.toString().replace(/^http(s)?:\/\/|\/\//g, "").toLowerCase() || "";
             parseURL(url1).forEach(function (rawUrl) {
                 socket.emit("DOMAIN_INFO", {domain: rawUrl, msg: "parse started"});
                 db.urldb.find({domain: rawUrl}).exec(function (err, doc) {
                     if (!err) {
-                        if (!doc.length) {//Ã»ÓĞ²éÑ¯¹ı
-                            if (!task[rawUrl]) {//¼ÇÂ¼ÈÎÎñºÍ¶©ÔÄÕß
+                        if (!doc.length) {//æ²¡æœ‰æŸ¥è¯¢è¿‡
+                            if (!task[rawUrl]) {//è®°å½•ä»»åŠ¡å’Œè®¢é˜…è€…
                                 task[rawUrl] = {
                                     t: +new Date(),
                                     domain: [],
-                                    stime: null,//dockerÆô¶¯¿ªÊ¼Ê±¼ä
-                                    etime: null,//dockerÆô¶¯Íê³ÉÊ±¼ä
-                                    port: null,//docker¶ÔÍâ¶Ë¿Ú
-                                    ip: null,//dockerµÄÍâÍøip
-                                    dockerinfo: null,//docker±¾Éí
+                                    stime: null,//dockerå¯åŠ¨å¼€å§‹æ—¶é—´
+                                    etime: null,//dockerå¯åŠ¨å®Œæˆæ—¶é—´
+                                    port: null,//dockerå¯¹å¤–ç«¯å£
+                                    ip: null,//dockerçš„å¤–ç½‘ip
+                                    dockerinfo: null,//dockeræœ¬èº«
                                     conn: {}
                                 };
                                 task[rawUrl].conn[socket.id] = socket;
 
 
-                                //ÅĞ¶Ï´æÔÚ·º½âÎö²»
+                                //åˆ¤æ–­å­˜åœ¨æ³›è§£æä¸
                                 dns.lookup([randomChar(), rawUrl].join("."), 4, function (err) {
                                     if (err) {
-                                        //·ÖÆ¬·½Ê½¡¢ÉÙÁ¿ÓòÃû¿ÉÒÔ£¬±È½Ï¿ì
+                                        //åˆ†ç‰‡æ–¹å¼ã€å°‘é‡åŸŸåå¯ä»¥ï¼Œæ¯”è¾ƒå¿«
                                         //dnsLook(dicGroup, rawUrl, 0);
 
-                                        //µİ¹é·½Ê½¡¢¶àÉÙÃ»¶¼ÎÊÌâ¾ÍÊÇÂıµã
+                                        //é€’å½’æ–¹å¼ã€å¤šå°‘æ²¡éƒ½é—®é¢˜å°±æ˜¯æ…¢ç‚¹
                                         // nextDns(rawUrl, 0)
 
-                                        //docker·½°¸¡¢µ¥Ñ­»·Òì²½£¬¼òÖ±¾ÍÊÇ±©Á¦£¡
-                                        //Æô¶¯docker
+                                        //dockeræ–¹æ¡ˆã€å•å¾ªç¯å¼‚æ­¥ï¼Œç®€ç›´å°±æ˜¯æš´åŠ›ï¼
+                                        //å¯åŠ¨docker
                                         dockerapis({
                                             type: "create",
                                             servicename: enUrl(rawUrl),
@@ -52,14 +52,14 @@ module.exports = function (io) {
                                             task[rawUrl].stime = +new Date();
                                             var tomonitor = true;
                                             var timer = setInterval(function () {
-                                                //¼àÊÓdocker
+                                                //ç›‘è§†docker
                                                 if (tomonitor) {
                                                     dockerapis({
                                                         type: "monitor",
                                                         servicename: enUrl(rawUrl)
                                                     }, function (res) {
                                                         var tmp = toJson(res);
-                                                        //dockerÒÑ¾­Æô¶¯
+                                                        //dockerå·²ç»å¯åŠ¨
                                                         if (tomonitor && tmp.current_status == "Running") {
                                                             tomonitor = false;
                                                             task[rawUrl].etime = +new Date();
@@ -73,7 +73,7 @@ module.exports = function (io) {
 
                                                             //io.connect(task[rawUrl].ip, task[rawUrl].port);
                                                             //
-                                                            //¿ª·¢ÖĞ
+                                                            //å¼€å‘ä¸­
                                                             //
                                                             //
                                                             sendMessage(rawUrl, "DOMAIN_STARTED2", []);
@@ -85,7 +85,7 @@ module.exports = function (io) {
                                         })
 
 
-                                    } else {//´æÔÚ·º½âÎö
+                                    } else {//å­˜åœ¨æ³›è§£æ
                                         dns.lookup(rawUrl, 4, function (err, doc) {
                                             var ip = doc ? doc : "0.0.0.0";
                                             socket.emit("DOMAIN_DATA", [{ip: ip, url: "*", domain: rawUrl}]);
@@ -95,13 +95,13 @@ module.exports = function (io) {
                                     }
                                 });
                             }
-                            else {//Ìí¼Ó¶©ÔÄ
+                            else {//æ·»åŠ è®¢é˜…
                                 if (!task[rawUrl].conn[socket.id])
                                     task[rawUrl].conn[socket.id] = socket;
                                 socket.emit("DOMAIN_DATA", task[rawUrl].domain);
                             }
                         }
-                        else {//ÒÑ¾­²éÑ¯¹ı
+                        else {//å·²ç»æŸ¥è¯¢è¿‡
 
                             socket.emit("DOMAIN_DATA", doc[0].subdomain);
                             socket.emit("DOMAIN_PROGRESS", {domain: rawUrl, pos: 1});
@@ -112,7 +112,7 @@ module.exports = function (io) {
             });
         });
 
-        //ÏìÓ¦¶Ï¿ªÁ¬½Ó
+        //å“åº”æ–­å¼€è¿æ¥
         socket.on("disconnect", function () {
             Object.keys(task).forEach(function (url) {
                 if (task[url].conn[socket.id])
@@ -122,12 +122,12 @@ module.exports = function (io) {
     });
 };
 
-//docker¼àÊÓ¡¢»ñÈ¡×îĞÂÉ¨Ãè½á¹û
+//dockerç›‘è§†ã€è·å–æœ€æ–°æ‰«æç»“æœ
 setInterval(function () {
 
 }, 500);
 
-//´óÊı×é·ÖÆ¬
+//å¤§æ•°ç»„åˆ†ç‰‡
 function arrSlice(arr, len) {
     var l = arr.length;
     if (l <= len)
@@ -150,7 +150,7 @@ function parseURL(urls) {
 }
 
 
-//·µ»Ø¶¨³¤Ëæ»ú×Ö·û´®
+//è¿”å›å®šé•¿éšæœºå­—ç¬¦ä¸²
 function randomChar(num) {
     var chars = "abcdefghijklmnopqrstuvwxyz";
     var result = [];
@@ -178,7 +178,7 @@ function nextDns(rawUrl, i) {
         if (i + 1 < dic.length)
             nextDns(rawUrl, i + 1);
         else
-        //±£´æ¼ÇÂ¼
+        //ä¿å­˜è®°å½•
             db.urldb.findOneAndUpdate({domain: rawUrl}, {
                 subdomain: task[rawUrl].domain,
                 updated_at: Date.now()
@@ -208,14 +208,14 @@ function dnsLook(arr, rawUrl, i) {
                     pos: (i * Math.floor(dic.length / splitNum) + tmpindex) / dic.length
                 });
             }
-            //µ±Ç°·ÖÆ¬Íê³É
+            //å½“å‰åˆ†ç‰‡å®Œæˆ
             if (tmpindex == arr[i].length) {
                 if (i + 1 < arr.length)
                     dnsLook(arr, rawUrl, i + 1);
-                else { //ËùÓĞ·ÖÆ¬Íê³É
+                else { //æ‰€æœ‰åˆ†ç‰‡å®Œæˆ
                     sendMessage(rawUrl, "DOMAIN_PROGRESS", {domain: rawUrl, pos: 1});
 
-                    //±£´æ¼ÇÂ¼
+                    //ä¿å­˜è®°å½•
                     db.urldb.findOneAndUpdate({domain: rawUrl}, {
                         subdomain: task[rawUrl].domain,
                         updated_at: Date.now()
@@ -229,7 +229,7 @@ function dnsLook(arr, rawUrl, i) {
 }
 
 
-//Ïò¶©ÔÄÕßÈº²¥
+//å‘è®¢é˜…è€…ç¾¤æ’­
 function sendMessage(url, title, body) {
     Object.keys(task[url].conn).forEach(function (id) {
         task[url].conn[id].emit(title, body)
