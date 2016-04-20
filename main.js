@@ -15,15 +15,16 @@ app.use(function (error, req, res, next) {
 });
 
 
-(function (app) {
-}(app, web));
-
+//(function (app) {
+//}(app, web));
 
 socket(io);
 
+//Æô¶¯webserver
 app.listen(config.webport, function () {
     console.log("web started at port ",config.webport)
 });
+//Æô¶¯socketserver
 server.listen(config.socketport, function () {
     console.log("socket started at port ",config.socketport)
 });
