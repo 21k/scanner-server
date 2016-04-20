@@ -12,7 +12,7 @@
 
 ## 前端-主人
 > * [https://github.com/21k/scanner-web](https://github.com/21k/scanner-web)
-> * 不漂亮怎么接接客！
+> * 不漂亮怎么接客！
 
 ## 服务端-总管
 > * [https://github.com/21k/scanner-server](https://github.com/21k/scanner-server)
